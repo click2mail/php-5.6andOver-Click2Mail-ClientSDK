@@ -138,7 +138,7 @@ class c2mAPIRest
 	{
 	$docName = "PHP SDK ".substr( md5(rand()), 0, 7);
 	$format =  strtoupper(pathinfo($file, PATHINFO_EXTENSION));
-	$ar = array('documentName' => $docName, "documentClass" => $documentClass, "documentFormat" => $format, "file" => new CURLFile($file,"type=".mime_content_type($file)));
+	$ar = array('documentName' => $docName, "documentClass" => $documentClass, "documentFormat" => $format, "file" => new CURLFile($file));
 	$xmlDoc = $this->rest_Call($this->get_restUrl() . "/molpro/documents/",$ar,"POST");
 	$this->documentId =  (string) $xmlDoc->id;
 	}
@@ -302,7 +302,13 @@ class c2mAPIRest
 			else
 			{
 			//	echo $output;
+			if( strpos($output,"{")!== false)
+				{
+					$output = $this->json2xml($output);
+				}
+				
 				$xml = simplexml_load_string($output) or die("Error: Cannot create object");
+				
 		//		$this->documentId = $xml->id;
 				$response = $xml;
 			}
@@ -334,7 +340,10 @@ class c2mAPIRest
 			}
 			else
 			{
-				
+				if( strpos($output,"{")!== false)
+				{
+					$output = $this->json2xml($output);
+				}
 				$xml = simplexml_load_string($output) or die("Error: Cannot create object");
 		//		$this->documentId = $xml->id;
 				$response = $xml;
@@ -369,7 +378,10 @@ class c2mAPIRest
 			}
 			else
 			{
-				
+				if( strpos($output,"{")!== false)
+				{
+					$output = $this->json2xml($output);
+				}
 				$xml = simplexml_load_string($output) or die("Error: Cannot create object");
 				$response = $xml;
 			}
@@ -379,9 +391,56 @@ class c2mAPIRest
 			curl_close($ch);
 			return $response;	
 	}
-	
+	function json2xml($json) {
+    $a = json_decode($json);
+    $d = new DOMDocument();
+    $c = $d->createElement("root");
+    $d->appendChild($c);
+    $t = function($v) {
+        $type = gettype($v);
+        switch($type) {
+            case 'integer': return 'number';
+            case 'double':  return 'number';
+            default: return strtolower($type);
+        }
+    };
+    $f = function($f,$c,$a,$s=false) use ($t,$d) {
+        $c->setAttribute('type', $t($a));
+        if ($t($a) != 'array' && $t($a) != 'object') {
+            if ($t($a) == 'boolean') {
+                $c->appendChild($d->createTextNode($a?'true':'false'));
+            } else {
+                $c->appendChild($d->createTextNode($a));
+            }
+        } else {
+            foreach($a as $k=>$v) {
+                if ($k == '__type' && $t($a) == 'object') {
+                    $c->setAttribute('__type', $v);
+                } else {
+                    if ($t($v) == 'object') {
+                        $ch = $c->appendChild($d->createElementNS(null, $s ? 'item' : $k));
+                        $f($f, $ch, $v);
+                    } else if ($t($v) == 'array') {
+                        $ch = $c->appendChild($d->createElementNS(null, $s ? 'item' : $k));
+                        $f($f, $ch, $v, true);
+                    } else {
+                        $va = $d->createElementNS(null, $s ? 'item' : $k);
+                        if ($t($v) == 'boolean') {
+                            $va->appendChild($d->createTextNode($v?'true':'false'));
+                        } else {
+                            $va->appendChild($d->createTextNode($v));
+                        }
+                        $ch = $c->appendChild($va);
+                        $ch->setAttribute('type', $t($v));
+                    }
+                }
+            }
+        }
+    };
+    $f($f,$c,$a,$t($a)=='array');
+    return $d->saveXML($d->documentElement);
+}
 
-	
 }
 class addresses {
 		public $addresses = array();
