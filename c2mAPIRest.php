@@ -6,6 +6,7 @@ class c2mAPIRest
 		$this->username = $un;
 		$this->password = $pw;
 		$this->addresses = new addresses();
+                $this->addressesCorrection= new addressesCorrection();
 		if(strtolower($live) =="live")
 		{
 			$this->mode = 1;
@@ -222,6 +223,18 @@ class c2mAPIRest
 		$address->Country_nonDASHUS = $country;
 		$this->addresses->addAddress($address);
 	}
+
+        public function addAddressCorrection($name,$address1,$address2,$city,$state,$zip)
+        {
+                $address = new addressCorrection();
+                $address->name = $name;
+                $address->address1 = $address1;
+                $address->address2 = $address2;
+                $address->city = $city;
+                $address->state = $state;
+                $address->zip = $zip;
+                $this->addressesCorrection->addAddress($address);
+        }
 	
 	public function clearJob()
 	{
@@ -231,6 +244,18 @@ class c2mAPIRest
 		$this->documentIdI= 0;
 	}
 	
+        public function createAddressCorrectionList(){
+                $this -> addressListxml = new SimpleXMLElement('<addresses/>');
+		$addressesXml = $this -> addressListxml;
+                foreach ($this->addressesCorrection->addresses as $address) {
+                        $addressXml = $addressesXml -> addChild('address');
+                        foreach($address  as $key=>$value)
+                        {
+                                                        $addressXml -> addChild(str_ireplace("DASH","-",$key), $value);
+                        }
+                }
+                return $this->addressListxml->asXML();
+        }
 	public function createAddressList(){
 		$this -> addressListxml = new SimpleXMLElement('<addressList/>');
 		$this -> addressListxml -> addChild('addressListName',"PHP SDK".substr( md5(rand()), 0, 7));
@@ -261,7 +286,7 @@ class c2mAPIRest
 		return $this->addressListxml->asXML();
 	}
 	
-	function get_restUrl()
+	public function get_restUrl()
 	{
 		if($this->mode == 0)
 		{
@@ -354,7 +379,7 @@ class c2mAPIRest
 			curl_close($ch);
 			return $response;	
 	}
-	function rest_UploadXML($url,$xml)
+	public function rest_UploadXML($url,$xml)
 	{
 		    
             
@@ -362,8 +387,12 @@ class c2mAPIRest
 		
 			$ch = curl_init();
 
+			$headers = array(
+    				'Content-Type: application/xml',
+    				'Accept: application/xml',
+			);
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			curl_setopt($ch, CURLOPT_USERPWD, $this->username . ":" . $this->password);
 			curl_setopt($ch, CURLOPT_POST, 1);
@@ -461,4 +490,19 @@ class addresses {
 	public $Zip;
 	public $Country_nonDASHUS;
 }
+class addressesCorrection {
+                public $addresses = array();
+                public function addAddress($address) {
+                        $this -> addresses[] = $address;
+                }
+        }
+
+        class addressCorrection {
+        public $name;
+        public $address1;
+        public $city;
+        public $state;
+        public $zip;
+}
+
 ?>
