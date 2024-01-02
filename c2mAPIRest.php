@@ -1,10 +1,12 @@
 <?PHP
 class c2mAPIRest
 {
-	function c2mAPIRest($un,$pw,$live)
+	function __construct($un,$pw,$live)
 	{
+		echo "Initializing..\n";
 		$this->username = $un;
 		$this->password = $pw;
+		echo "Creating addresses array\n";
 		$this->addresses = new addresses();
                 $this->addressesCorrection= new addressesCorrection();
 		if(strtolower($live) =="live")
@@ -22,13 +24,15 @@ class c2mAPIRest
 
 	public $username = "";
 	public $password = "";
-	public $addresses;
+	public $addresses; 
 	public $mode= 0;
 	public $documentId = 0;
 	public $addressListId = 0;
 	public $addressListStatus = 0;
 	public $jobId = 0;
-		
+	public $addressesCorrection;
+	public $addressListxml;	
+	
     function mime_content_type($filename) {
 
         $mime_types = array(
@@ -214,13 +218,14 @@ class c2mAPIRest
 		$address = new address();
 		$address->First_name = $first;
 		$address->Last_name = $last;
-		$address->organization = $org;
+		$address->Organization = $org;
 		$address->Address1 = $address1;
 		$address->Address2 = $address2;
 		$address->City = $city;
 		$address->State = $state;
 		$address->Zip = $zip;
 		$address->Country_nonDASHUS = $country;
+		echo "Adding address\n";
 		$this->addresses->addAddress($address);
 	}
 
@@ -241,7 +246,7 @@ class c2mAPIRest
 		$this->addresses = new addresses();
 		$this->jobId = 0;
 		$this->addressListId = 0;
-		$this->documentIdI= 0;
+		$this->documentId = 0;
 	}
 	
         public function createAddressCorrectionList(){
@@ -491,18 +496,18 @@ class addresses {
 	public $Country_nonDASHUS;
 }
 class addressesCorrection {
-                public $addresses = array();
-                public function addAddress($address) {
-                        $this -> addresses[] = $address;
-                }
+     	public $addresses = array();
+      	public function addAddress($address) {
+        	$this -> addresses[] = $address;
+         	}
         }
 
-        class addressCorrection {
-        public $name;
-        public $address1;
-        public $city;
-        public $state;
-        public $zip;
+class addressCorrection {
+       public $name;
+       public $address1;
+       public $city;
+       public $state;
+       public $zip;
 }
 
 ?>
