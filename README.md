@@ -23,6 +23,7 @@ Job Submit
 SimpleXMLElement Object
 
 (
+
     [id] => XXXXX
     [status] => 4
     [description] => Awaiting Production
