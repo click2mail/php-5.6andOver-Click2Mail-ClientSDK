@@ -6,6 +6,7 @@ To run it:
 > php rest_simpleMail.php
 
 All goes well, you should see the following output:
+
 -----------------------------
 Initializing..
 Creating addresses array
@@ -20,7 +21,7 @@ Job Create
 Job Submit
 
 SimpleXMLElement Object
-\(
+(
     [id] => XXXXX
     [status] => 4
     [description] => Awaiting Production
@@ -35,7 +36,7 @@ SimpleXMLElement Object
         (
         )
 
-\)
+)
 
 
 documentId: XXXXX
@@ -43,5 +44,6 @@ documentId: XXXXX
 AddressListId: XXXXXX
 
 jobId: XXXXXX
+
 --------------
 
