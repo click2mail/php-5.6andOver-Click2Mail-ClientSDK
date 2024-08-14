@@ -21,6 +21,7 @@ Job Create
 Job Submit
 
 SimpleXMLElement Object
+
 (
     [id] => XXXXX
     [status] => 4
